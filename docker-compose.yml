@@ -2,15 +2,15 @@ services:
   db:
     image: postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: qwerty
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123456
       POSTGRES_DB: engkids
     ports:
       - "5432:5432"
   engkids:
     build: .
     ports:
-      - "5050:5050"
+      - "3030:3030"
     env_file:
       - .env
     depends_on:
