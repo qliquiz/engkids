@@ -1,12 +1,12 @@
 package database
 
 import (
+	"engkids/internal/models" // Импортируем модели
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
 	"os"
-	"engkids/internal/models" // Импортируем модели
 )
 
 // ConnectDB устанавливает подключение к базе данных
@@ -27,7 +27,7 @@ func ConnectDB() *gorm.DB {
 	fmt.Println("Database connection established")
 
 	// Выполняем миграции для всех моделей
-	err = db.AutoMigrate(&models.User{}, &models.Child{}, &models.Progress{})
+	err = db.AutoMigrate(&models.User{}, &models.Child{}, &models.Progress{}, &models.RefreshToken{})
 	if err != nil {
 		log.Fatal("Error during migration: ", err)
 	}

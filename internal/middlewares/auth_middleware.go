@@ -1,48 +1,76 @@
 package middlewares
 
 import (
+	"engkids/internal/services"
 	"engkids/pkg/jwt"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-// Protected middleware для проверки JWT токена
+var authService *services.AuthService
+
+// InjectAuthService нужен для инициализации authService
+func InjectAuthService(s *services.AuthService) {
+	authService = s
+}
+
+// Protected middleware с авто-обновлением токена (для mobile)
 func Protected() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
-		
-		// Проверяем наличие заголовка
 		if authHeader == "" {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Необходима авторизация",
-			})
+			return unauthorized("Необходим access токен")
 		}
-		
-		// Проверяем формат (Bearer {token})
+
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Неверный формат токена",
-			})
+			return unauthorized("Неверный формат Authorization")
 		}
-		
-		// Извлекаем токен
-		tokenString := parts[1]
-		
-		// Валидируем токен
-		claims, err := jwt.ValidateToken(tokenString)
+
+		accessToken := parts[1]
+		claims, err := jwt.ValidateToken(accessToken)
+
+		if err == nil {
+			// access валиден
+			setLocals(c, claims)
+			return c.Next()
+		}
+
+		// access просрочен — пробуем refresh
+		refreshToken := c.Get("X-Refresh-Token")
+		if refreshToken == "" {
+			return unauthorized("Access истёк, refresh не передан")
+		}
+
+		if authService == nil {
+			return unauthorized("AuthService не инициализирован")
+		}
+
+		resp, err := authService.Refresh(refreshToken)
 		if err != nil {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Недействительный токен",
-			})
+			return unauthorized("Refresh токен невалиден")
 		}
-		
-		// Добавляем данные пользователя в контекст
-		c.Locals("userID", claims.UserID)
-		c.Locals("email", claims.Email)
-		c.Locals("role", claims.Role)
-		
+
+		// Обновляем токены клиенту
+		c.Set("X-New-Access-Token", resp.AccessToken)
+		c.Set("X-New-Refresh-Token", resp.RefreshToken)
+
+		user := resp.User
+		c.Locals("userID", user.ID)
+		c.Locals("email", user.Email)
+		c.Locals("role", user.Role)
+
 		return c.Next()
 	}
+}
+
+func setLocals(c *fiber.Ctx, claims *jwt.Claims) {
+	c.Locals("userID", claims.UserID)
+	c.Locals("email", claims.Email)
+	c.Locals("role", claims.Role)
+}
+
+func unauthorized(msg string) error {
+	return fiber.NewError(fiber.StatusUnauthorized, msg)
 }
