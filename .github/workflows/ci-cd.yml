@@ -35,7 +35,7 @@ jobs:
       - name: Run tests
         run: go test ./...
 
-      - name: Lint (optional)
+      - name: Lint
         run: |
           go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
           golangci-lint run ./...
