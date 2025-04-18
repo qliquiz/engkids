@@ -9,6 +9,10 @@ import (
 
 // SetupRoutes sets up routes for the API
 func SetupRoutes(app *fiber.App, db *gorm.DB) {
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("hi from the server)")
+	})
+
 	api := app.Group("/api")
 
 	// @Summary Register user
