@@ -1,17 +1,26 @@
 services:
+  app:
+    build: .
+    container_name: engkids
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    env_file:
+      - .env
+    restart: always
+
   db:
-    image: postgres
+    image: postgres:16
+    container_name: engkids_db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: qwerty
       POSTGRES_DB: engkids
     ports:
       - "5432:5432"
-  engkids:
-    build: .
-    ports:
-      - "5050:5050"
-    env_file:
-      - .env
-    depends_on:
-      - db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
