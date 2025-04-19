@@ -10,7 +10,7 @@ services:
       - logstash
     environment:
       - PORT=3000
-      - DB_HOST=postgres
+      - DB_HOST=engkids_db
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=qwerty
