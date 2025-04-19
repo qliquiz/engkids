@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	_ "engkids/docs"
 	"engkids/internal/routes"
 	"engkids/pkg/database"
@@ -9,8 +10,14 @@ import (
 	"github.com/gofiber/swagger"
 	"github.com/joho/godotenv"
 	"log"
+	"net"
 	"os"
 )
+
+type LogMessage struct {
+	Level   string `json:"level"`
+	Message string `json:"message"`
+}
 
 // @title EngKids API
 // @version 1.0
@@ -33,4 +40,16 @@ func main() {
 		port = "3000"
 	}
 	log.Fatal(app.Listen(":" + port))
+
+	conn, err := net.Dial("tcp", "localhost:5000")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	msg := LogMessage{
+		Level:   "INFO",
+		Message: "Hello from Go!",
+	}
+	_ = json.NewEncoder(conn).Encode(msg)
 }
