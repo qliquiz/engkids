@@ -4,12 +4,13 @@ import (
 	_ "engkids/docs"
 	"engkids/internal/routes"
 	"engkids/pkg/database"
+	"engkids/pkg/elasticsearch"
+	"engkids/pkg/logger"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/swagger"
 	"github.com/joho/godotenv"
 	"log"
-	"net"
 	"os"
 )
 
@@ -20,28 +21,52 @@ import (
 // @BasePath /
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Warning: Error loading .env file")
 	}
+
+	// Инициализация логгера
+	appLogger, err := logger.NewLogger("engkids")
+	if err != nil {
+		log.Fatalf("Failed to initialize logger: %v", err)
+	}
+
+	// Подключение к базе данных
 	db := database.ConnectDB()
+
+	// Подключение к Elasticsearch
+	var esClient *elasticsearch.Client
+	es, err := elasticsearch.NewClient()
+	if err != nil {
+		appLogger.Warn("Failed to connect to Elasticsearch (ELK monitoring will be limited): ", err)
+	} else {
+		esClient = es
+		appLogger.Info("Successfully connected to Elasticsearch")
+	}
+
+	// Настройка Fiber
 	app := fiber.New()
-	app.Use(logger.New())
 
+	// Добавляем middleware для генерации уникального ID запроса
+	app.Use(requestid.New())
+
+	// Добавляем middleware для логирования
+	app.Use(logger.LoggingMiddleware(appLogger))
+
+	// Настройка Swagger
 	app.Get("/swagger/*", swagger.HandlerDefault)
-	routes.SetupRoutes(app, db)
 
+	// Настройка маршрутов
+	routes.SetupRoutes(app, db, appLogger, esClient)
+
+	// Получаем порт из переменных окружения
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "3000"
+		port = "8080"
 	}
-	log.Fatal(app.Listen(":" + port))
 
-	conn, err := net.Dial("tcp", "localhost:5000")
-	if err != nil {
-		log.Fatal("dosn't work: ", err)
+	// Запускаем сервер
+	appLogger.WithField("port", port).Info("Starting HTTP server")
+	if err := app.Listen(":" + port); err != nil {
+		appLogger.Fatal("Failed to start server: ", err)
 	}
-	defer conn.Close()
-
-	logger := log.New(conn, "", log.LstdFlags)
-	logger.Println("hi from go to logstash")
-	logger.Println("it works")
 }

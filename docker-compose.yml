@@ -3,11 +3,25 @@ services:
     build: .
     container_name: engkids
     ports:
-      - "3000:3000"
+      - "8080:8080"
     depends_on:
       - db
+      - elasticsearch
+      - logstash
     env_file:
       - .env
+    environment:
+      - PORT=8080
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=qwerty
+      - DB_NAME=engkids_db
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - LOGSTASH_HOST=logstash
+      - LOGSTASH_PORT=5000
+    networks:
+      - app-network
     restart: always
 
   db:
@@ -19,6 +33,8 @@ services:
       POSTGRES_DB: engkids
     ports:
       - "5432:5432"
+    networks:
+      - app-network
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -37,6 +53,9 @@ services:
         hard: -1
     ports:
       - "9200:9200"
+      - "9300:9300"
+    networks:
+      - app-network
     volumes:
       - esdata:/usr/share/elasticsearch/data
 
@@ -49,19 +68,42 @@ services:
     environment:
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - app-network
+
+  setup-kibana:
+    image: curlimages/curl:latest
+    volumes:
+      - ./scripts:/scripts
+    command: [ "/bin/sh", "/scripts/setup-kibana.sh" ]
+    depends_on:
+      - kibana
+    networks:
+      - app-network
 
   logstash:
     platform: linux/amd64
     image: docker.elastic.co/logstash/logstash:8.13.0
     container_name: logstash
     environment:
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - LS_JAVA_OPTS=-Xms256m -Xmx256m
     volumes:
       - ./logstash/pipeline:/usr/share/logstash/pipeline
+      - ./logstash/config:/usr/share/logstash/config
+    depends_on:
+      - elasticsearch
+    networks:
+      - app-network
     ports:
       - "5044:5044"
       - "5000:5000"
       - "9600:9600"
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   pgdata:
