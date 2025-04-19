@@ -9,7 +9,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/swagger"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 )
@@ -20,10 +19,6 @@ import (
 // @host localhost:5050
 // @BasePath /
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Println("Warning: Error loading .env file")
-	}
-
 	// Инициализация логгера
 	appLogger, err := logger.NewLogger("engkids")
 	if err != nil {

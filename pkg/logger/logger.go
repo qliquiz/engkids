@@ -38,9 +38,10 @@ func NewLogger(appName string) (*Logger, error) {
 		hookAddress := fmt.Sprintf("%s:%s", logstashHost, logstashPort)
 		hook, err := NewLogstashHook("tcp", hookAddress, appName)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create logstash hook: %v", err)
+			log.Warnf("Logstash unavailable (%s): %v", hookAddress, err)
+		} else {
+			log.AddHook(hook)
 		}
-		log.AddHook(hook)
 	}
 
 	return &Logger{log}, nil
