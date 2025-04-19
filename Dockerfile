@@ -5,7 +5,7 @@ RUN go mod tidy && go build -o app .
 
 FROM alpine:latest
 WORKDIR /app
-RUN apk --no-cache add ca-certificates tzdata
+RUN apk --no-cache add bash ca-certificates tzdata
 
 COPY --from=builder /app/app .
 COPY scripts/wait-for-it.sh /wait-for-it.sh
