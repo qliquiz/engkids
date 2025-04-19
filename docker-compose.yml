@@ -62,7 +62,7 @@ services:
     ports:
       - "5601:5601"
     environment:
-      - LS_JAVA_OPTS=-Xms256m -Xmx256m
+      - LS_JAVA_OPTS=-Xms512m -Xmx512m
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
       - xpack.security.enabled=false
       - SERVER_HOST=0.0.0.0
@@ -74,7 +74,7 @@ services:
       - elasticsearch
     networks:
       - app-network
-    mem_limit: 256m
+    mem_limit: 512m
 
   setup-kibana:
     image: curlimages/curl:latest
