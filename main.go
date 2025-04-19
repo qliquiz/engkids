@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	_ "engkids/docs"
 	"engkids/internal/routes"
 	"engkids/pkg/database"
@@ -13,11 +12,6 @@ import (
 	"net"
 	"os"
 )
-
-type LogMessage struct {
-	Level   string `json:"level"`
-	Message string `json:"message"`
-}
 
 // @title EngKids API
 // @version 1.0
@@ -43,13 +37,11 @@ func main() {
 
 	conn, err := net.Dial("tcp", "localhost:5000")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("dosn't work: ", err)
 	}
 	defer conn.Close()
 
-	msg := LogMessage{
-		Level:   "INFO",
-		Message: "Hello from Go!",
-	}
-	_ = json.NewEncoder(conn).Encode(msg)
+	logger := log.New(conn, "", log.LstdFlags)
+	logger.Println("hi from go to logstash")
+	logger.Println("it works")
 }

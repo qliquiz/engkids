@@ -50,18 +50,18 @@ services:
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
 
-#  logstash:
-#    platform: linux/amd64
-#    image: docker.elastic.co/logstash/logstash:8.13.0
-#    container_name: logstash
-#    environment:
-#      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-#    volumes:
-#      - ./logstash/pipeline:/usr/share/logstash/pipeline
-#    ports:
-#      - "5044:5044"
-#      - "5000:5000"
-#      - "9600:9600"
+  logstash:
+    platform: linux/amd64
+    image: docker.elastic.co/logstash/logstash:8.13.0
+    container_name: logstash
+    environment:
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+    ports:
+      - "5044:5044"
+      - "5000:5000"
+      - "9600:9600"
 
 volumes:
   pgdata:
