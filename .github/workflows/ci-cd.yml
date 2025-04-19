@@ -58,6 +58,4 @@ jobs:
             cd /root/engkids/engkids
             git pull origin main
             docker compose down
-#            systemctl disable docker
-#            reboot
-#            docker compose up -d --build
+            docker compose up -d --build
