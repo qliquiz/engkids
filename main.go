@@ -24,6 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
+	appLogger.Info("test message from Go")
 
 	// Подключение к базе данных
 	db := database.ConnectDB()
