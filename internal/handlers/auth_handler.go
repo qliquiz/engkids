@@ -1,5 +1,6 @@
 package handlers
 
+/*
 import (
 	"engkids/internal/models"
 	"engkids/pkg/elasticsearch"
@@ -190,3 +191,4 @@ func GetLogs(es *elasticsearch.Client, log *logger.Logger) fiber.Handler {
 		return c.JSON(result)
 	}
 }
+*/
