@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -22,12 +23,13 @@ func NewLogger(appName string) (*logrus.Logger, error) {
 	}
 
 	logger := logrus.New()
-	logger.SetOutput(file)
+
+	logger.SetOutput(io.MultiWriter(os.Stdout, file))
+
 	logger.SetFormatter(&logrus.JSONFormatter{
 		TimestampFormat: time.RFC3339Nano,
 	})
 	logger.SetLevel(logrus.InfoLevel)
-	logger.WithField("app", appName)
 
 	return logger, nil
 }
@@ -46,7 +48,7 @@ func LoggingMiddleware(log *logrus.Logger) fiber.Handler {
 			"ip":         c.IP(),
 			"request_id": c.Locals("requestid"),
 			"user_agent": c.Get("User-Agent"),
-			"timestamp":  time.Now().Format(time.RFC3339Nano),
+			"time":       time.Now().Format(time.RFC3339Nano),
 		})
 
 		if err != nil {

@@ -1,15 +1,15 @@
 filebeat.inputs:
-  - type: filestream
+  - type: log
     enabled: true
     paths:
-      - /var/log/engkids/app.log
+      - /usr/share/filebeat/logs/*.log
     parsers:
       - ndjson:
           overwrite_keys: true
           add_error_key: true
 
-output.logstash:
-  hosts: ["logstash:5000"]
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
 
 processors:
   - add_fields:

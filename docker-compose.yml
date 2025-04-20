@@ -7,7 +7,7 @@ services:
     depends_on:
       - engkids_db
       - elasticsearch
-      - logstash
+#      - logstash
     environment:
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
@@ -89,34 +89,33 @@ services:
     networks:
       - app-network
 
-  logstash:
-    platform: linux/amd64
-    image: docker.elastic.co/logstash/logstash:8.13.0
-    container_name: logstash
-    environment:
-      - LS_JAVA_OPTS=-Xms256m -Xmx256m
-    volumes:
-      - ./logstash/pipeline:/usr/share/logstash/pipeline
-      - ./logstash/config:/usr/share/logstash/config
-    depends_on:
-      - elasticsearch
-    networks:
-      - app-network
-    ports:
-      - "5000:5000"
-    mem_limit: 256m
+#  logstash:
+#    platform: linux/amd64
+#    image: docker.elastic.co/logstash/logstash:8.13.0
+#    container_name: logstash
+#    environment:
+#      - LS_JAVA_OPTS=-Xms256m -Xmx256m
+#    volumes:
+#      - ./logstash/pipeline:/usr/share/logstash/pipeline
+#      - ./logstash/config:/usr/share/logstash/config
+#    depends_on:
+#      - elasticsearch
+#    networks:
+#      - app-network
+#    ports:
+#      - "5000:5000"
+#    mem_limit: 256m
 
   filebeat:
     image: docker.elastic.co/beats/filebeat:8.13.0
     user: root
     volumes:
       - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - /var/log/engkids:/var/log/engkids:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./logs:/usr/share/filebeat/logs
+      - /var/log/engkids:/usr/share/filebeat/logs:ro
     depends_on:
-      - logstash
+      - elasticsearch
+    networks:
+      - app-network
     restart: always
 
 networks:
