@@ -1,32 +1,28 @@
 package routes
 
 import (
-	"engkids/internal/handlers"
+	//"engkids/internal/handlers"
 	"engkids/internal/middlewares"
-	"engkids/internal/services"
+	//"engkids/internal/services"
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
-func SetupRoutes(app *fiber.App, db *gorm.DB, logger *logrus.Logger, _ interface{}) {
-	// Создаем сервис аутентификации
-	authService := services.NewAuthService(db)
+func SetupRoutes(app *fiber.App, db *gorm.DB, logger *logrus.Logger) {
+	//authService := services.NewAuthService(db)
 
-	// Создаем обработчики
-	authHandler := handlers.NewAuthHandler(authService)
+	//authHandler := handlers.NewAuthHandler(authService)
 
-	// Передаем authService в middleware
-	middlewares.InjectAuthService(authService)
+	//middlewares.InjectAuthService(authService)
 
-	// Группа API
 	api := app.Group("/api")
 
 	// Публичные маршруты
-	auth := api.Group("/auth")
+	/*auth := api.Group("/auth")
 	auth.Post("/register", authHandler.Register)
 	auth.Post("/login", authHandler.Login)
-	auth.Post("/refresh", authHandler.Refresh)
+	auth.Post("/refresh", authHandler.Refresh)*/
 
 	// Защищённые маршруты
 	protected := api.Group("/user", middlewares.Protected())

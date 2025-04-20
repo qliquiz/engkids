@@ -13,17 +13,14 @@ import (
 )
 
 func main() {
-	// Инициализация логгера (пишет в файл logs/app.log)
 	appLogger, err := logger.NewLogger("engkids")
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
 	appLogger.Info("Logger initialized")
 
-	// Подключение к базе данных
 	db := database.ConnectDB()
 
-	// Настройка Fiber
 	app := fiber.New()
 
 	app.Use(requestid.New())
@@ -31,13 +28,11 @@ func main() {
 
 	app.Get("/swagger/*", swagger.HandlerDefault)
 
-	// Настройка маршрутов
 	routes.SetupRoutes(app, db, appLogger)
 
-	// Получаем порт из .env
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "3000"
 	}
 
 	appLogger.WithField("port", port).Info("Starting HTTP server")
