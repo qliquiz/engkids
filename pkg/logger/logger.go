@@ -83,7 +83,7 @@ func (hook *LogstashHook) Fire(entry *logrus.Entry) error {
 		return fmt.Errorf("failed to marshal fields to JSON: %v", err)
 	}
 
-	_, err = hook.conn.Write(serialized)
+	_, err = hook.conn.Write(append(serialized, '\n'))
 	return err
 }
 
