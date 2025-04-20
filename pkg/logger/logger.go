@@ -10,7 +10,6 @@ import (
 )
 
 func NewLogger(appName string) (*logrus.Logger, error) {
-	// Убедимся, что папка существует
 	logDir := "logs"
 	if err := os.MkdirAll(logDir, 0755); err != nil {
 		return nil, err

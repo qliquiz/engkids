@@ -114,6 +114,7 @@ services:
       - /var/log/engkids:/var/log/engkids:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./logs:/usr/share/filebeat/logs
     depends_on:
       - logstash
     restart: always
