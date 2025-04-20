@@ -1,0 +1,18 @@
+filebeat.inputs:
+  - type: filestream
+    enabled: true
+    paths:
+      - /var/log/engkids/app.log
+    parsers:
+      - ndjson:
+          overwrite_keys: true
+          add_error_key: true
+
+output.logstash:
+  hosts: ["logstash:5000"]
+
+processors:
+  - add_fields:
+      target: ""
+      fields:
+        type: engkids-log

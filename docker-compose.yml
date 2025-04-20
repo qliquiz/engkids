@@ -108,6 +108,18 @@ services:
       - "9600:9600"
     mem_limit: 256m
 
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.13.0
+    user: root
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/log/engkids:/var/log/engkids:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - logstash
+    restart: always
+
 networks:
   app-network:
     driver: bridge
