@@ -67,6 +67,7 @@ services:
       - xpack.security.enabled=false
       - SERVER_HOST=0.0.0.0
       - SERVER_NAME=kibana
+      - NODE_OPTIONS=--max-old-space-size=1024
       - STATUS_ALLOWANONYMOUS=true
       - TELEMETRY_ENABLED=false
       - INTERACTIVESETUP_ENABLED=false
