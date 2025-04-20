@@ -103,9 +103,7 @@ services:
     networks:
       - app-network
     ports:
-      - "5044:5044"
       - "5000:5000"
-      - "9600:9600"
     mem_limit: 256m
 
   filebeat:
