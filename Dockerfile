@@ -14,4 +14,4 @@ RUN chmod +x /wait-for-it.sh
 ENV TZ=UTC
 EXPOSE 3000
 
-ENTRYPOINT ["/wait-for-it.sh", "engkids_db:5432", "-t", "90", "--", "/wait-for-it.sh", "logstash:5000", "-t", "90", "--", "/wait-for-it.sh", "elasticsearch:9200", "-t", "90", "--", "./app"]
+ENTRYPOINT ["/wait-for-it.sh", "engkids_db:5432", "-t", "90", "--", "/wait-for-it.sh", "elasticsearch:9200", "-t", "90", "--", "./app"]
