@@ -48,9 +48,10 @@ services:
       - bootstrap.memory_lock=true
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9200" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 100s
     ulimits:
       memlock:
         soft: -1
