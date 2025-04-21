@@ -4,7 +4,9 @@ import (
 	_ "engkids/docs"
 	"engkids/internal/routes"
 	"engkids/pkg/database"
+	"engkids/pkg/elasticsearch"
 	"engkids/pkg/logger"
+	//"github.com/elastic/go-elasticsearch/v8"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/swagger"
@@ -13,6 +15,11 @@ import (
 )
 
 func main() {
+	es, err := elasticsearch.NewClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	appLogger, err := logger.NewLogger("engkids")
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
@@ -28,7 +35,7 @@ func main() {
 
 	app.Get("/swagger/*", swagger.HandlerDefault)
 
-	routes.SetupRoutes(app, db, appLogger)
+	routes.SetupRoutes(app, db, es, appLogger)
 
 	port := os.Getenv("PORT")
 	if port == "" {

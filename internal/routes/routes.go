@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"engkids/internal/handlers"
+	"engkids/pkg/elasticsearch"
 	//"engkids/internal/handlers"
 	"engkids/internal/middlewares"
 	//"engkids/internal/services"
@@ -9,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func SetupRoutes(app *fiber.App, db *gorm.DB, logger *logrus.Logger) {
+func SetupRoutes(app *fiber.App, db *gorm.DB, es *elasticsearch.Client, logger *logrus.Logger) {
 	app.Get("/", func(c *fiber.Ctx) error {
 		logger.Info("get hi from /")
 		return c.SendString("hi from the server!")
@@ -24,6 +26,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, logger *logrus.Logger) {
 	api := app.Group("/api")
 
 	// Публичные маршруты
+	api.Get("/logs", handlers.GetLogs(es, logger))
 	/*auth := api.Group("/auth")
 	auth.Post("/register", authHandler.Register)
 	auth.Post("/login", authHandler.Login)
