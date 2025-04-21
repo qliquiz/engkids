@@ -2,10 +2,9 @@ package routes
 
 import (
 	"engkids/internal/handlers"
-	"engkids/pkg/elasticsearch"
-	//"engkids/internal/handlers"
 	"engkids/internal/middlewares"
-	//"engkids/internal/services"
+	"engkids/internal/services"
+	"engkids/pkg/elasticsearch"
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -17,23 +16,24 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, es *elasticsearch.Client, logger *
 		return c.SendString("hi from the server!")
 	})
 
-	//authService := services.NewAuthService(db)
-
-	//authHandler := handlers.NewAuthHandler(authService)
-
-	//middlewares.InjectAuthService(authService)
+	authService := services.NewAuthService(db)
+	authHandler := handlers.NewAuthHandler(authService)
+	middlewares.InjectAuthService(authService)
 
 	api := app.Group("/api")
 
 	// Публичные маршруты
 	api.Get("/logs", handlers.GetLogs(es, logger))
-	/*auth := api.Group("/auth")
+
+	auth := api.Group("/auth")
+
 	auth.Post("/register", authHandler.Register)
 	auth.Post("/login", authHandler.Login)
-	auth.Post("/refresh", authHandler.Refresh)*/
+	auth.Post("/refresh", authHandler.Refresh)
 
 	// Защищённые маршруты
 	protected := api.Group("/user", middlewares.Protected())
+
 	protected.Get("/profile", func(c *fiber.Ctx) error {
 		userID := c.Locals("userID")
 		logger.WithField("userID", userID).Info("accessed protected profile route")

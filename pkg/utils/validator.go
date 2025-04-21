@@ -1,15 +1,22 @@
 package utils
 
-import "github.com/go-playground/validator"
+import (
+	"github.com/go-playground/validator"
+	"github.com/gofiber/fiber/v2"
+)
 
-var Validate = validator.New()
+var validate = validator.New()
 
-func ValidateStruct(s interface{}) map[string]string {
-	errs := map[string]string{}
-	if err := Validate.Struct(s); err != nil {
-		for _, err := range err.(validator.ValidationErrors) {
-			errs[err.Field()] = err.Tag()
-		}
+func ValidateStruct(s interface{}) error {
+	return validate.Struct(s)
+}
+
+func ParseAndValidate(c *fiber.Ctx, dst interface{}) error {
+	if err := c.BodyParser(dst); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Невозможно обработать данные")
 	}
-	return errs
+	if err := ValidateStruct(dst); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	return nil
 }

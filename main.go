@@ -6,7 +6,6 @@ import (
 	"engkids/pkg/database"
 	"engkids/pkg/elasticsearch"
 	"engkids/pkg/logger"
-	//"github.com/elastic/go-elasticsearch/v8"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/swagger"
