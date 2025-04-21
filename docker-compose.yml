@@ -46,6 +46,11 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - bootstrap.memory_lock=true
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9200" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ulimits:
       memlock:
         soft: -1
@@ -116,7 +121,8 @@ services:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
     networks:
       - app-network
     restart: always
