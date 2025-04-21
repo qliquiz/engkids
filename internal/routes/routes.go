@@ -10,6 +10,11 @@ import (
 )
 
 func SetupRoutes(app *fiber.App, db *gorm.DB, logger *logrus.Logger) {
+	app.Get("/", func(c *fiber.Ctx) error {
+		logger.Info("get hi from /")
+		return c.SendString("hi from the server!")
+	})
+
 	//authService := services.NewAuthService(db)
 
 	//authHandler := handlers.NewAuthHandler(authService)
