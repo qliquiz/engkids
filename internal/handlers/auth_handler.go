@@ -182,7 +182,7 @@ func GetLogs(es *elasticsearch.Client, log *logrus.Logger) fiber.Handler {
 		}
 
 		// Отправляем запрос в Elasticsearch
-		result, err := es.Search("engkids-logs-*", query)
+		result, err := es.Search("filebeat-*", query)
 		if err != nil {
 			log.WithError(err).Error("Failed to search logs in Elasticsearch")
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
