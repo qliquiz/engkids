@@ -1,16 +1,17 @@
 package handlers
 
-/*
 import (
-	"engkids/internal/models"
+	//"engkids/internal/models"
 	"engkids/pkg/elasticsearch"
-	"engkids/pkg/jwt"
-	"engkids/pkg/logger"
-	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
+
+	"github.com/gofiber/fiber/v2"
+	//"github.com/sirupsen/logrus"
+	//"golang.org/x/crypto/bcrypt"
+	//"gorm.io/gorm"
 )
+
+/*
 
 // Register godoc
 // @Summary Register a new user
@@ -107,6 +108,7 @@ func Login(db *gorm.DB, log *logger.Logger) fiber.Handler {
 		return c.JSON(fiber.Map{"token": token})
 	}
 }
+*/
 
 // GetLogs godoc
 // @Summary Get application logs
@@ -120,7 +122,7 @@ func Login(db *gorm.DB, log *logger.Logger) fiber.Handler {
 // @Success 200 {object} fiber.Map
 // @Failure 500 {object} fiber.Map
 // @Router /api/logs [get]
-func GetLogs(es *elasticsearch.Client, log *logger.Logger) fiber.Handler {
+func GetLogs(es *elasticsearch.Client, log *logrus.Logger) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		from := c.Query("from")
 		to := c.Query("to")
@@ -188,7 +190,8 @@ func GetLogs(es *elasticsearch.Client, log *logger.Logger) fiber.Handler {
 			})
 		}
 
+		log.Info("Logs retrieved successfully")
+
 		return c.JSON(result)
 	}
 }
-*/
