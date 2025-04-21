@@ -1,18 +1,17 @@
 filebeat.inputs:
-  - type: log
+  - type: container
     enabled: true
     paths:
-      - /usr/share/filebeat/logs/*.log
-    parsers:
-      - ndjson:
-          overwrite_keys: true
-          add_error_key: true
+      - /var/lib/docker/containers/*/*.log
+    processors:
+      - add_docker_metadata: ~
 
 output.elasticsearch:
   hosts: ["http://elasticsearch:9200"]
+  setup.ilm.enabled: false
 
-processors:
-  - add_fields:
-      target: ""
-      fields:
-        type: engkids-log
+setup.kibana:
+  host: "http://kibana:5601"
+  setup.dashboards.enabled: true
+
+logging.level: warning

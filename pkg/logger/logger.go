@@ -1,9 +1,7 @@
 package logger
 
 import (
-	"io"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,20 +9,9 @@ import (
 )
 
 func NewLogger(appName string) (*logrus.Logger, error) {
-	logDir := "logs"
-	if err := os.MkdirAll(logDir, 0755); err != nil {
-		return nil, err
-	}
-
-	logPath := filepath.Join(logDir, "app.log")
-	file, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return nil, err
-	}
-
 	logger := logrus.New()
 
-	logger.SetOutput(io.MultiWriter(os.Stdout, file))
+	logger.SetOutput(os.Stdout)
 
 	logger.SetFormatter(&logrus.JSONFormatter{
 		TimestampFormat: time.RFC3339Nano,
