@@ -5,6 +5,9 @@ filebeat.inputs:
       - /var/lib/docker/containers/*/*.log
     processors:
       - add_docker_metadata: ~
+    json.keys_under_root: true
+    json.add_error_key: true
+    json.message_key: message
 
 output.elasticsearch:
   hosts: ["http://elasticsearch:9200"]
