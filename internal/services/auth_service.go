@@ -112,3 +112,14 @@ func (s *AuthService) buildFullAuthResponse(user *models.User) (*dto.FullAuthRes
 		User:         *user,
 	}, nil
 }
+
+func (s *AuthService) Logout(refreshToken string) error {
+	result := s.DB.Where("token = ?", refreshToken).Delete(&models.RefreshToken{})
+	if result.Error != nil {
+		return fiber.ErrInternalServerError
+	}
+	if result.RowsAffected == 0 {
+		return fiber.NewError(fiber.StatusUnauthorized, "invalid refresh token")
+	}
+	return nil
+}

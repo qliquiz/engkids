@@ -64,6 +64,21 @@ func (h *AuthHandler) Refresh(c *fiber.Ctx) error {
 	return c.JSON(resp)
 }
 
+func (h *AuthHandler) Logout(c *fiber.Ctx) error {
+	var body struct {
+		RefreshToken string `json:"refresh_token" validate:"required"`
+	}
+	if err := utils.ParseAndValidate(c, &body); err != nil {
+		return errors.Handle(c, err)
+	}
+
+	if err := h.Service.Logout(body.RefreshToken); err != nil {
+		return errors.Handle(c, err)
+	}
+
+	return c.SendStatus(fiber.StatusOK)
+}
+
 // GetLogs godoc
 // @Summary Get application logs
 // @Description Get application logs from Elasticsearch

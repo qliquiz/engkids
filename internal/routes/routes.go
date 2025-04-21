@@ -30,6 +30,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, es *elasticsearch.Client, logger *
 	auth.Post("/register", authHandler.Register)
 	auth.Post("/login", authHandler.Login)
 	auth.Post("/refresh", authHandler.Refresh)
+	auth.Post("/logout", authHandler.Logout)
 
 	// Защищённые маршруты
 	protected := api.Group("/user", middlewares.Protected())
@@ -40,6 +41,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, es *elasticsearch.Client, logger *
 		return c.JSON(fiber.Map{
 			"message": "Защищённый маршрут",
 			"userID":  userID,
+			"email":   c.Locals("email"),
 		})
 	})
 }
