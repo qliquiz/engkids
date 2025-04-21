@@ -7,6 +7,7 @@ import (
 	"engkids/pkg/elasticsearch"
 	"engkids/pkg/logger"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/swagger"
 	"log"
@@ -31,6 +32,11 @@ func main() {
 
 	app.Use(requestid.New())
 	app.Use(logger.LoggingMiddleware(appLogger))
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowMethods: "GET,POST,PUT,DELETE,OPTIONS",
+		AllowHeaders: "Content-Type, Authorization",
+	}))
 
 	app.Get("/swagger/*", swagger.HandlerDefault)
 
