@@ -8,6 +8,8 @@ filebeat.inputs:
     json.keys_under_root: true
     json.add_error_key: true
     json.message_key: message
+    include_lines: [ '.*engkids.*' ]
+#    exclude_files: [ '.*(elasticsearch|postgres).*' ]
 
 output.elasticsearch:
   hosts: ["http://elasticsearch:9200"]
