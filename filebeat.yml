@@ -5,11 +5,14 @@ filebeat.inputs:
       - /var/lib/docker/containers/*/*.log
     processors:
       - add_docker_metadata: ~
+      - drop_event:
+          when:
+            not:
+              equals:
+                container.name: engkids
     json.keys_under_root: true
     json.add_error_key: true
     json.message_key: message
-    include_lines: [ '.*engkids.*' ]
-#    exclude_files: [ '.*(elasticsearch|postgres).*' ]
 
 output.elasticsearch:
   hosts: ["http://elasticsearch:9200"]
