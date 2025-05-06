@@ -58,7 +58,7 @@ jobs:
             cd /root/engkids/engkids
             git pull origin main
             docker compose down -v
-            docker system prune -af --volumes
-            docker load -i ../../filebeat_amd64.tar
-            docker load -i ../../elk.tar
+#            docker system prune -af --volumes
+#            docker load -i ../../filebeat_amd64.tar
+#            docker load -i ../../elk.tar
             docker compose up -d --build
