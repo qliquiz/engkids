@@ -13,7 +13,7 @@ import (
 func SetupRoutes(app *fiber.App, db *gorm.DB, es *elasticsearch.Client, logger *logrus.Logger) {
 	app.Get("/", func(c *fiber.Ctx) error {
 		logger.Info("get hi from /")
-		return c.SendString("new hi by ci/cd!!!!!!!!!!!")
+		return c.SendString("another hi")
 	})
 
 	authService := services.NewAuthService(db)
