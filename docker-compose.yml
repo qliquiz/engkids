@@ -129,4 +129,4 @@ networks:
 
 volumes:
   pgdata:
-  esdata:
+#  esdata:
