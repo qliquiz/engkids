@@ -6,9 +6,6 @@ import (
 	"engkids/internal/services"
 	"engkids/pkg/utils"
 
-	"engkids/pkg/elasticsearch"
-	"github.com/sirupsen/logrus"
-
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -91,7 +88,7 @@ func (h *AuthHandler) Logout(c *fiber.Ctx) error {
 // @Success 200 {object} fiber.Map
 // @Failure 500 {object} fiber.Map
 // @Router /api/logs [get]
-func GetLogs(es *elasticsearch.Client, log *logrus.Logger) fiber.Handler {
+/*func GetLogs(es *elasticsearch.Client, log *logrus.Logger) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		from := c.Query("from")
 		to := c.Query("to")
@@ -163,4 +160,4 @@ func GetLogs(es *elasticsearch.Client, log *logrus.Logger) fiber.Handler {
 
 		return c.JSON(result)
 	}
-}
+}*/

@@ -4,7 +4,7 @@ import (
 	_ "engkids/docs"
 	"engkids/internal/routes"
 	"engkids/pkg/database"
-	"engkids/pkg/elasticsearch"
+	//"engkids/pkg/elasticsearch"
 	"engkids/pkg/logger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -15,10 +15,10 @@ import (
 )
 
 func main() {
-	es, err := elasticsearch.NewClient()
-	if err != nil {
-		log.Fatal(err)
-	}
+	//es, err := elasticsearch.NewClient()
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 
 	appLogger, err := logger.NewLogger("engkids")
 	if err != nil {
@@ -40,7 +40,7 @@ func main() {
 
 	app.Get("/swagger/*", swagger.HandlerDefault)
 
-	routes.SetupRoutes(app, db, es, appLogger)
+	routes.SetupRoutes(app, db, appLogger)
 
 	port := os.Getenv("PORT")
 	if port == "" {

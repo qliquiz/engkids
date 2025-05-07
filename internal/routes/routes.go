@@ -4,13 +4,12 @@ import (
 	"engkids/internal/handlers"
 	"engkids/internal/middlewares"
 	"engkids/internal/services"
-	"engkids/pkg/elasticsearch"
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
-func SetupRoutes(app *fiber.App, db *gorm.DB, es *elasticsearch.Client, logger *logrus.Logger) {
+func SetupRoutes(app *fiber.App, db *gorm.DB, logger *logrus.Logger) {
 	app.Get("/", func(c *fiber.Ctx) error {
 		logger.Info("get hi from /")
 		return c.SendString("another hi")
@@ -23,7 +22,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, es *elasticsearch.Client, logger *
 	api := app.Group("/api")
 
 	// Публичные маршруты
-	api.Get("/logs", handlers.GetLogs(es, logger))
+	//api.Get("/logs", handlers.GetLogs(es, logger))
 
 	auth := api.Group("/auth")
 

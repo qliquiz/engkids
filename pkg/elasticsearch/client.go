@@ -1,5 +1,6 @@
 package elasticsearch
 
+/*
 import (
 	"context"
 	"encoding/json"
@@ -101,3 +102,4 @@ func (c *Client) IndexDocument(index string, document map[string]interface{}) er
 
 	return nil
 }
+*/
