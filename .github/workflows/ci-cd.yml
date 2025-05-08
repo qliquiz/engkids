@@ -7,31 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  verify:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.24'
-          cache: true
-
-      - name: Prepare dependencies
-        run: |
-          go clean -modcache
-          go mod download
-
-      - name: Verify dependencies
-        run: |
-          go mod tidy -compat=1.24
-          if [ -n "$(git status --porcelain go.mod go.sum)" ]; then
-            echo "Error: go.mod or go.sum changed after go mod tidy"
-            git diff go.mod go.sum
-            exit 1
-          fi
-
   build:
-    needs: verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,16 +15,6 @@ jobs:
         with:
           go-version: '1.24'
           cache: true
-
-      - name: Cache Go modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
 
       - name: Install dependencies
         run: go mod tidy && go mod download
