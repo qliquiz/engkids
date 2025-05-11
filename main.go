@@ -2,9 +2,10 @@ package main
 
 import (
 	_ "engkids/docs"
+	"engkids/internal/repositories"
 	"engkids/internal/routes"
+	"engkids/internal/services"
 	"engkids/pkg/database"
-	//"engkids/pkg/elasticsearch"
 	"engkids/pkg/logger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -15,11 +16,6 @@ import (
 )
 
 func main() {
-	//es, err := elasticsearch.NewClient()
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-
 	appLogger, err := logger.NewLogger("engkids")
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
@@ -28,8 +24,17 @@ func main() {
 
 	db := database.ConnectDB()
 
-	app := fiber.New()
+	// Создание репозиториев
+	authRepo := repositories.NewAuthGormRepository(db)
+	userRepo := repositories.NewUserGormRepository(db) // Предполагается, что этот метод существует или будет создан
 
+	// Инициализация сервисов с репозиториями
+	authService := services.NewAuthService(authRepo)
+	//userService := services.NewUserService(userRepo)
+	userService := services.NewUserService(userRepo.DB)
+
+
+	app := fiber.New()
 	app.Use(requestid.New())
 	app.Use(logger.LoggingMiddleware(appLogger))
 	app.Use(cors.New(cors.Config{
@@ -40,7 +45,8 @@ func main() {
 
 	app.Get("/swagger/*", swagger.HandlerDefault)
 
-	routes.SetupRoutes(app, db, appLogger)
+	// Правильная передача сервисов в маршруты
+	routes.SetupRoutes(app, authService, userService, appLogger)
 
 	port := os.Getenv("PORT")
 	if port == "" {

@@ -4,21 +4,15 @@ import (
 	"engkids/internal/handlers"
 	"engkids/internal/middlewares"
 	"engkids/internal/services"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
-func SetupRoutes(app *fiber.App, db *gorm.DB, logger *logrus.Logger) {
+func SetupRoutes(app *fiber.App, authService *services.AuthService, userService *services.UserService, logger *logrus.Logger) {
 	app.Get("/", func(c *fiber.Ctx) error {
 		logger.Info("get hi from /")
 		return c.SendString("another hi")
 	})
-
-	// Инициализация сервисов
-	authService := services.NewAuthService(db)
-	userService := services.NewUserService(db)
 
 	// Инициализация обработчиков
 	authHandler := handlers.NewAuthHandler(authService)
@@ -30,7 +24,6 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, logger *logrus.Logger) {
 	api := app.Group("/api")
 
 	// Публичные маршруты
-	//api.Get("/logs", handlers.GetLogs(es, logger))
 	auth := api.Group("/auth")
 	auth.Post("/register", authHandler.Register)
 	auth.Post("/login", authHandler.Login)

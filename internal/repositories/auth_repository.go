@@ -17,6 +17,9 @@ type AuthRepository interface {
 	DeleteRefreshToken(token string) error
 	DeleteRefreshTokenByUserID(userID uint) error
 	GetUserByID(userID uint) (*models.User, error)
+
+	// Добавим метод для создания статистики
+	CreateUserStatistics(stats *models.UserStatistics) error
 }
 
 // AuthGormRepository реализация AuthRepository с использованием GORM
@@ -27,18 +30,6 @@ type AuthGormRepository struct {
 // NewAuthGormRepository создает новый экземпляр репозитория авторизации
 func NewAuthGormRepository(db *gorm.DB) *AuthGormRepository {
 	return &AuthGormRepository{DB: db}
-}
-
-// GetUserByEmail получает пользователя по email
-func (r *AuthGormRepository) GetUserByEmail(email string) (*models.User, error) {
-	var user models.User
-	if err := r.DB.Where("email = ?", email).First(&user).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fiber.NewError(fiber.StatusUnauthorized, "Неверный email или пароль")
-		}
-		return nil, fiber.ErrInternalServerError
-	}
-	return &user, nil
 }
 
 // CreateUser создает нового пользователя
@@ -54,6 +45,18 @@ func (r *AuthGormRepository) CreateUser(user *models.User) error {
 		return fiber.ErrInternalServerError
 	}
 	return nil
+}
+
+// GetUserByEmail получает пользователя по email
+func (r *AuthGormRepository) GetUserByEmail(email string) (*models.User, error) {
+	var user models.User
+	if err := r.DB.Where("email = ?", email).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fiber.NewError(fiber.StatusUnauthorized, "Неверный email или пароль")
+		}
+		return nil, fiber.ErrInternalServerError
+	}
+	return &user, nil
 }
 
 // GetRefreshToken получает refresh токен
@@ -108,4 +111,12 @@ func (r *AuthGormRepository) GetUserByID(userID uint) (*models.User, error) {
 		return nil, fiber.ErrInternalServerError
 	}
 	return &user, nil
+}
+
+// CreateUserStatistics создает статистику пользователя
+func (r *AuthGormRepository) CreateUserStatistics(stats *models.UserStatistics) error {
+	if err := r.DB.Create(stats).Error; err != nil {
+		return fiber.ErrInternalServerError
+	}
+	return nil
 }

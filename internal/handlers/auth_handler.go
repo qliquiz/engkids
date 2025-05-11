@@ -4,7 +4,7 @@ import (
 	"engkids/internal/dto"
 	"engkids/internal/errors"
 	"engkids/internal/services"
-	"engkids/pkg/utils"
+	"engkids/utils"
 
 	"github.com/gofiber/fiber/v2"
 )
