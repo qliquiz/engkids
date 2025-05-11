@@ -4,6 +4,7 @@ import (
 	"engkids/internal/handlers"
 	"engkids/internal/middlewares"
 	"engkids/internal/services"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 )
@@ -32,17 +33,6 @@ func SetupRoutes(app *fiber.App, authService *services.AuthService, userService 
 
 	// Защищённые маршруты
 	protected := api.Group("/user", middlewares.Protected())
-
-	// Оставляем оригинальный обработчик профиля для обратной совместимости
-	protected.Get("/profile-legacy", func(c *fiber.Ctx) error {
-		userID := c.Locals("userID")
-		logger.WithField("userID", userID).Info("accessed protected profile route")
-		return c.JSON(fiber.Map{
-			"message": "Защищённый маршрут",
-			"userID":  userID,
-			"email":   c.Locals("email"),
-		})
-	})
 
 	// Новые маршруты
 	// Профиль пользователя и статистика
