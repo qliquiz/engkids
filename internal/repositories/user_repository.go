@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"engkids/internal/interfaces"
 	"engkids/internal/models"
 	"errors"
 	"time"
@@ -9,13 +10,13 @@ import (
 	"gorm.io/gorm"
 )
 
-// UserGormRepository реализует UserRepository с использованием GORM
+// UserGormRepository реализует интерфейс UserRepository с использованием GORM
 type UserGormRepository struct {
 	DB *gorm.DB
 }
 
 // NewUserGormRepository создает новый экземпляр репозитория
-func NewUserGormRepository(db *gorm.DB) *UserGormRepository {
+func NewUserGormRepository(db *gorm.DB) interfaces.UserRepository {
 	return &UserGormRepository{DB: db}
 }
 
@@ -176,7 +177,7 @@ func (r *UserGormRepository) GetWordByID(wordID uint) (*models.Word, error) {
 }
 
 // BeginTx начинает новую транзакцию
-func (r *UserGormRepository) BeginTx() (Transaction, error) {
+func (r *UserGormRepository) BeginTx() (interfaces.Transaction, error) {
 	tx := r.DB.Begin()
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -233,5 +234,3 @@ func (t *GormTransaction) CheckInventoryItemExists(userID uint, itemID uint) (bo
 	}
 	return count > 0, nil
 }
-
-

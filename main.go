@@ -26,12 +26,12 @@ func main() {
 
 	// Создание репозиториев
 	authRepo := repositories.NewAuthGormRepository(db)
-	userRepo := repositories.NewUserGormRepository(db) // Предполагается, что этот метод существует или будет создан
+	userRepo := repositories.NewUserGormRepository(db) 
+
 
 	// Инициализация сервисов с репозиториями
-	authService := services.NewAuthService(authRepo)
-	//userService := services.NewUserService(userRepo)
-	userService := services.NewUserService(userRepo.DB)
+	authService := services.NewAuthService(*authRepo)
+	userService := services.NewUserService(userRepo)
 
 
 	app := fiber.New()

@@ -8,20 +8,6 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// AuthRepository интерфейс для работы с авторизацией
-type AuthRepository interface {
-	GetUserByEmail(email string) (*models.User, error)
-	CreateUser(user *models.User) error
-	GetRefreshToken(token string) (*models.RefreshToken, error)
-	SaveRefreshToken(rt *models.RefreshToken) error
-	DeleteRefreshToken(token string) error
-	DeleteRefreshTokenByUserID(userID uint) error
-	GetUserByID(userID uint) (*models.User, error)
-
-	// Добавим метод для создания статистики
-	CreateUserStatistics(stats *models.UserStatistics) error
-}
-
 // AuthGormRepository реализация AuthRepository с использованием GORM
 type AuthGormRepository struct {
 	DB *gorm.DB
