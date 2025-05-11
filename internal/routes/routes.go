@@ -31,19 +31,18 @@ func SetupRoutes(app *fiber.App, authService *services.AuthService, userService 
 	auth.Post("/refresh", authHandler.Refresh)
 	auth.Post("/logout", authHandler.Logout)
 
-	// Защищённые маршруты
-	protected := api.Group("/user", middlewares.Protected())
+	// Все маршруты теперь публичные
+	user := api.Group("/user")
 
-	// Новые маршруты
 	// Профиль пользователя и статистика
-	protected.Get("/profile", userHandler.GetUserProfile)
+	user.Get("/profile", userHandler.GetUserProfile)
 
 	// Инвентарь и гардероб
-	protected.Get("/inventory", userHandler.GetUserInventory)
-	protected.Put("/inventory/item", userHandler.UpdateInventoryItem)
-	protected.Post("/inventory/purchase", userHandler.PurchaseItem)
+	user.Get("/inventory", userHandler.GetUserInventory)
+	user.Put("/inventory/item", userHandler.UpdateInventoryItem)
+	user.Post("/inventory/purchase", userHandler.PurchaseItem)
 
 	// Словарь пользователя
-	protected.Get("/words", userHandler.GetUserWords)
-	protected.Post("/words/learn", userHandler.LearnWord)
+	user.Get("/words", userHandler.GetUserWords)
+	user.Post("/words/learn", userHandler.LearnWord)
 }
