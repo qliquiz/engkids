@@ -105,7 +105,9 @@ func (s *UserService) GetOrCreateUserStatistics(userID uint) (*models.UserStatis
 
 	// Обновляем последнюю активность
 	stats.LastActive = time.Now()
-	s.UserRepo.UpdateLastActive(userID, time.Now())
+	if err := s.UserRepo.UpdateLastActive(userID, time.Now()); err != nil {
+		return nil, err
+	}
 
 	return stats, nil
 }
@@ -207,46 +209,67 @@ func (s *UserService) PurchaseItem(userID uint, req *dto.PurchaseItemRequest) er
 
 	defer func() {
 		if r := recover(); r != nil {
-			tx.Rollback()
+			if err := tx.Rollback(); err != nil {
+				// Логирование ошибки откатывания транзакции
+				// log.Printf("Failed to rollback tx: %v", err)
+			}
 		}
 	}()
 
 	// Находим предмет
 	item, err := tx.GetItemByID(req.ItemID)
 	if err != nil {
-		tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			// Логирование ошибки откатывания транзакции
+			// log.Printf("Failed to rollback tx: %v", rollbackErr)
+		}
 		return err
 	}
 
 	// Проверяем, есть ли уже этот предмет у пользователя
 	exists, err := tx.CheckInventoryItemExists(userID, req.ItemID)
 	if err != nil {
-		tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			// Логирование ошибки откатывания транзакции
+			// log.Printf("Failed to rollback tx: %v", rollbackErr)
+		}
 		return fiber.ErrInternalServerError
 	}
 
 	if exists {
-		tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			// Логирование ошибки откатывания транзакции
+			// log.Printf("Failed to rollback tx: %v", rollbackErr)
+		}
 		return fiber.NewError(fiber.StatusConflict, "Вы уже владеете этим предметом")
 	}
 
 	// Получаем статистику для проверки монет
 	stats, err := tx.GetUserStatistics(userID)
 	if err != nil {
-		tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			// Логирование ошибки откатывания транзакции
+			// log.Printf("Failed to rollback tx: %v", rollbackErr)
+		}
 		return fiber.ErrInternalServerError
 	}
 
 	// Проверяем, достаточно ли монет
 	if stats.Coins < item.Price {
-		tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			// Логирование ошибки откатывания транзакции
+			// log.Printf("Failed to rollback tx: %v", rollbackErr)
+		}
 		return fiber.NewError(fiber.StatusBadRequest, "Недостаточно монет для покупки")
 	}
 
 	// Вычитаем монеты
 	stats.Coins -= item.Price
 	if err := tx.UpdateUserStatistics(stats); err != nil {
-		tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			// Логирование ошибки откатывания транзакции
+			// log.Printf("Failed to rollback tx: %v", rollbackErr)
+		}
 		return fiber.ErrInternalServerError
 	}
 
@@ -259,7 +282,10 @@ func (s *UserService) PurchaseItem(userID uint, req *dto.PurchaseItemRequest) er
 	}
 
 	if err := tx.CreateInventoryItem(inventoryItem); err != nil {
-		tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			// Логирование ошибки откатывания транзакции
+			// log.Printf("Failed to rollback tx: %v", rollbackErr)
+		}
 		return fiber.ErrInternalServerError
 	}
 
