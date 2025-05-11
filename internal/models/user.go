@@ -11,9 +11,6 @@ type User struct {
 	Email     string         `json:"email" gorm:"unique;not null"`
 	Password  string         `json:"-" gorm:"not null"`
 	Role      string         `json:"role" gorm:"default:'parent'"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
 type Child struct {
