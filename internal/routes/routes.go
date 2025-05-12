@@ -31,18 +31,30 @@ func SetupRoutes(app *fiber.App, authService *services.AuthService, userService 
 	auth.Post("/refresh", authHandler.Refresh)
 	auth.Post("/logout", authHandler.Logout)
 
-	// Все маршруты теперь публичные
-	user := api.Group("/user")
+	// Защищённые маршруты
+	protected := api.Group("/user", middlewares.Protected())
 
+	// Оставляем оригинальный обработчик профиля для обратной совместимости
+	protected.Get("/profile-legacy", func(c *fiber.Ctx) error {
+		userID := c.Locals("userID")
+		logger.WithField("userID", userID).Info("accessed protected profile route")
+		return c.JSON(fiber.Map{
+			"message": "Защищённый маршрут",
+			"userID":  userID,
+			"email":   c.Locals("email"),
+		})
+	})
+
+	// Новые маршруты
 	// Профиль пользователя и статистика
-	user.Get("/profile", userHandler.GetUserProfile)
+	protected.Get("/profile", userHandler.GetUserProfile)
 
 	// Инвентарь и гардероб
-	user.Get("/inventory", userHandler.GetUserInventory)
-	user.Put("/inventory/item", userHandler.UpdateInventoryItem)
-	user.Post("/inventory/purchase", userHandler.PurchaseItem)
+	protected.Get("/inventory", userHandler.GetUserInventory)
+	protected.Put("/inventory/item", userHandler.UpdateInventoryItem)
+	protected.Post("/inventory/purchase", userHandler.PurchaseItem)
 
 	// Словарь пользователя
-	user.Get("/words", userHandler.GetUserWords)
-	user.Post("/words/learn", userHandler.LearnWord)
+	protected.Get("/words", userHandler.GetUserWords)
+	protected.Post("/words/learn", userHandler.LearnWord)
 }
