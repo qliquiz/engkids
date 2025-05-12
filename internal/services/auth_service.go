@@ -3,109 +3,120 @@ package services
 import (
 	"engkids/internal/dto"
 	"engkids/internal/models"
+	"engkids/internal/repositories"
 	"engkids/pkg/jwt"
-	"errors"
+	"log"
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
-	"log"
-	"time"
 )
 
 type AuthService struct {
-	DB *gorm.DB
+	repo repositories.AuthGormRepository
 }
 
-func NewAuthService(db *gorm.DB) *AuthService {
-	return &AuthService{DB: db}
+func NewAuthService(repo repositories.AuthGormRepository) *AuthService {
+	return &AuthService{repo: repo}
 }
 
 func (s *AuthService) Register(req *dto.RegisterRequest) (*dto.FullAuthResponse, error) {
-	var existing models.User
-	if err := s.DB.Where("email = ?", req.Email).First(&existing).Error; err == nil {
-		return nil, fiber.NewError(fiber.StatusConflict, "Пользователь уже существует")
-	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
-		log.Println("DB error:", err)
-		return nil, fiber.ErrInternalServerError
-	}
-
+	// Хешируем пароль
 	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "Хеширование пароля не удалось")
 	}
 
+	// Создаем пользователя
 	user := models.User{
 		Email:    req.Email,
 		Password: string(hashed),
 		Role:     "user",
 	}
 
-	if err := s.DB.Create(&user).Error; err != nil {
-		log.Println("DB create error:", err)
-		return nil, fiber.ErrInternalServerError
+	// Сохраняем пользователя через репозиторий
+	if err := s.repo.CreateUser(&user); err != nil {
+		return nil, err
+	}
+
+	// Создаем статистику пользователя
+	stats := &models.UserStatistics{
+		UserID: user.ID,
+		// Инициализация статистики по умолчанию
+	}
+
+	if err := s.repo.CreateUserStatistics(stats); err != nil {
+		return nil, err
 	}
 
 	return s.buildFullAuthResponse(&user)
 }
 
 func (s *AuthService) Login(req *dto.LoginRequest) (*dto.FullAuthResponse, error) {
-	var user models.User
-	if err := s.DB.Where("email = ?", req.Email).First(&user).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fiber.NewError(fiber.StatusUnauthorized, "Неверный email или пароль")
-		}
-		log.Println("DB error:", err)
-		return nil, fiber.ErrInternalServerError
+	// Получаем пользователя через репозиторий
+	user, err := s.repo.GetUserByEmail(req.Email)
+	if err != nil {
+		return nil, err
 	}
 
+	// Проверяем пароль
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		return nil, fiber.NewError(fiber.StatusUnauthorized, "Неверный email или пароль")
 	}
 
-	return s.buildFullAuthResponse(&user)
+	return s.buildFullAuthResponse(user)
 }
 
 func (s *AuthService) Refresh(oldRefresh string) (*dto.FullAuthResponse, error) {
-	var rt models.RefreshToken
-	err := s.DB.Where("token = ?", oldRefresh).First(&rt).Error
-	if err != nil || rt.ExpiresAt.Before(time.Now()) {
-		return nil, fiber.NewError(fiber.StatusUnauthorized, "Неверный или просроченный refresh токен")
+	// Получаем токен через репозиторий
+	rt, err := s.repo.GetRefreshToken(oldRefresh)
+	if err != nil {
+		return nil, err
 	}
 
-	var user models.User
-	if err := s.DB.First(&user, rt.UserID).Error; err != nil {
-		return nil, fiber.ErrInternalServerError
+	// Проверяем срок действия
+	if rt.ExpiresAt.Before(time.Now()) {
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "Просроченный refresh токен")
 	}
-	log.Println("refresh: ", &rt)
-	s.DB.Delete(&rt)
-	return s.buildFullAuthResponse(&user)
+
+	// Получаем пользователя
+	user, err := s.repo.GetUserByID(rt.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Удаляем старый токен
+	if err := s.repo.DeleteRefreshToken(oldRefresh); err != nil {
+		log.Println("Ошибка при удалении старого токена:", err)
+	}
+
+	return s.buildFullAuthResponse(user)
 }
 
 func (s *AuthService) buildFullAuthResponse(user *models.User) (*dto.FullAuthResponse, error) {
+	// Генерируем JWT токен
 	accessToken, err := jwt.GenerateToken(user.ID, user.Email, user.Role)
 	if err != nil {
 		return nil, fiber.ErrInternalServerError
 	}
 
+	// Создаем refresh токен
 	refreshToken := uuid.NewString()
-
 	rt := models.RefreshToken{
 		UserID:    user.ID,
 		Token:     refreshToken,
 		ExpiresAt: time.Now().Add(30 * 24 * time.Hour),
 	}
-	err = s.DB.
-		Clauses(clause.OnConflict{
-			Columns:   []clause.Column{{Name: "user_id"}},
-			UpdateAll: true,
-		}).Create(&rt).Error
-	if err != nil {
-		return nil, fiber.ErrInternalServerError
+
+	// Сохраняем через репозиторий
+	if err := s.repo.SaveRefreshToken(&rt); err != nil {
+		return nil, err
 	}
 
+	// Не отправляем пароль
 	user.Password = ""
+
 	return &dto.FullAuthResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
@@ -114,12 +125,5 @@ func (s *AuthService) buildFullAuthResponse(user *models.User) (*dto.FullAuthRes
 }
 
 func (s *AuthService) Logout(refreshToken string) error {
-	result := s.DB.Where("token = ?", refreshToken).Delete(&models.RefreshToken{})
-	if result.Error != nil {
-		return fiber.ErrInternalServerError
-	}
-	if result.RowsAffected == 0 {
-		return fiber.NewError(fiber.StatusUnauthorized, "invalid refresh token")
-	}
-	return nil
+	return s.repo.DeleteRefreshToken(refreshToken)
 }

@@ -32,12 +32,23 @@ func ConnectDB() *gorm.DB {
 
 	log.Println("Database connection established")
 
-	err = db.AutoMigrate(&models.User{}, &models.Child{}, &models.Progress{}, &models.RefreshToken{})
+	// Remove models.Progress from the migration since it's commented out
+	err = db.AutoMigrate(
+		&models.User{},
+		&models.Child{},
+		// &models.Progress{},  // Removed
+		&models.RefreshToken{},
+		&models.UserStatistics{},
+		&models.InventoryItem{},
+		&models.Item{},
+		&models.UserWord{},
+		&models.Word{},
+	)
 	if err != nil {
 		log.Fatal("Error during migration: ", err)
 	}
-	fmt.Println("Migrations applied successfully")
 
+	fmt.Println("Migrations applied successfully")
 	return db
 }
 
@@ -55,9 +66,11 @@ func CloseDB() {
 	if err != nil {
 		log.Fatal("Failed to close database connection: ", err)
 	}
+
 	err = sqlDB.Close()
 	if err != nil {
 		log.Fatal("Failed to close database connection: ", err)
 	}
+
 	fmt.Println("Database connection closed")
 }
